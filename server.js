@@ -7,25 +7,33 @@ const app = express();
 app.use(express.static('public'));
 app.use(bodyParser.urlencoded({extended: true}));
 app.set('view engine', 'ejs');
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT;
 
 
 //Main configuration variables
-const urlToCheck = `http://urlyouwant.com/tocheck`;
-const elementsToSearchFor = ['Text you want to watch for', 'imageYouWantToCheckItsExistence.png'];
-const checkingFrequency = 5 * 60000; //first number represent the checkingFrequency in minutes
+const urlToCheck = process.env.URL;
+const elementsToSearchFor = ['Giugno', 'Luglio', 'Settembre', 'GIUGNO', 'LUGLIO', 'SETTEMBRE'];
+const checkingFrequency = 60 * 60000; //first number represent the checkingFrequency in minutes
 
 //Slack Integration
+/*
 const SLACK_WEBHOOK_URL = 'https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX';
 const slack = require('slack-notify')(SLACK_WEBHOOK_URL);
+*/
+
+//Discord Integration
+const DISCORD_WEBHOOK_URL = process.env.DISCORD;
+const {Webhook} = require('discord-webhook-node');
+const discord = new Webhook(DISCORD_WEBHOOK_URL);
 
 //SendGrid Email Integration
-const SENDGRID_APY_KEY = 'AA.AAAA_AAAAAAAAAAAAA.AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
+/*
+const SENDGRID_APY_KEY = process.env.SENDGRID;
 const sgMail = require('@sendgrid/mail');
 sgMail.setApiKey(SENDGRID_APY_KEY);
 const emailFrom = 'aaa@aaa.com';
 const emailsToAlert = ['emailOneToSend@theAlert.com', 'emailTwoToSend@theAlert.com'];
-
+*/
 
 const checkingNumberBeforeWorkingOKEmail = 1440 / (checkingFrequency / 60000);   //1 day = 1440 minutes
 let requestCounter = 0;
@@ -51,6 +59,7 @@ const intervalId = setInterval(function () {
                 if (elementsToSearchFor.some((el) => body.includes(el))) {
 
                     // Slack Alert Notification
+                    /*
                     slack.alert(`🔥🔥🔥  <${urlToCheck}/|Change detected in ${urlToCheck}>  🔥🔥🔥 `, function (err) {
                         if (err) {
                             console.log('Slack API error:', err);
@@ -58,8 +67,15 @@ const intervalId = setInterval(function () {
                             console.log('Message received in slack!');
                         }
                     });
+                    */
+
+                    // Discord Information Message
+                    discord.info(`**ATTENZIONE**`, `Cambiamento!`, `🔥🔥🔥 Cambiamento rilevato su ${urlToCheck} 🔥🔥🔥 `)
+                    .then(() => console.log('Message received in Discord!'))
+                    .catch(err => console.log(`Discord API error: ${err.message}`));
 
                     // Email Alert Notification
+                    /*
                     const msg = {
                         to: emailsToAlert,
                         from: emailFrom,
@@ -69,6 +85,7 @@ const intervalId = setInterval(function () {
                     sgMail.send(msg)
                         .then(()=>{console.log("Alert Email Sent!");})
                         .catch((emailError)=>{console.log(emailError);});
+                    */
                 }
 
             }
@@ -82,7 +99,8 @@ const intervalId = setInterval(function () {
     if (requestCounter > checkingNumberBeforeWorkingOKEmail) {
 
         requestCounter = 0;
-
+        
+        /*
         const msg = {
             to: emailsToAlert,
             from: emailFrom,
@@ -92,6 +110,12 @@ const intervalId = setInterval(function () {
         sgMail.send(msg)
             .then(()=>{console.log("Working OK Email Sent!");})
             .catch((emailError)=>{console.log(emailError);});
+        */
+
+        // Discord Information Message
+        discord.info(`**Stato**`, `Stato`, `👀👀👀 Il servizio di monitoraggio è OK 👀👀👀`)
+        .then(() => console.log('Message received in Discord!'))
+        .catch(err => console.log(`Discord API error: ${err.message}`));
     }
 
 }, checkingFrequency);
