@@ -13,7 +13,7 @@ const PORT = process.env.PORT;
 //Main configuration variables
 const urlToCheck = process.env.URL;
 const elementsToSearchFor = ['Giugno', 'Luglio', 'Settembre', 'GIUGNO', 'LUGLIO', 'SETTEMBRE'];
-const checkingFrequency = 60 * 60000; //first number represent the checkingFrequency in minutes
+const checkingFrequency = 5 * 60000; //first number represent the checkingFrequency in minutes
 
 //Slack Integration
 /*
