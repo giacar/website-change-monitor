@@ -25,6 +25,8 @@ const slack = require('slack-notify')(SLACK_WEBHOOK_URL);
 const DISCORD_WEBHOOK_URL = process.env.DISCORD;
 const {Webhook} = require('discord-webhook-node');
 const discord = new Webhook(DISCORD_WEBHOOK_URL);
+discord.setUsername('Calendario Esami')
+discord.setAvatar('https://raw.githubusercontent.com/giacar/website-change-monitor/master/public/mstile-150x150.png')
 
 //SendGrid Email Integration
 /*
