@@ -38,6 +38,10 @@ const emailsToAlert = ['emailOneToSend@theAlert.com', 'emailTwoToSend@theAlert.c
 const checkingNumberBeforeWorkingOKEmail = 1440 / (checkingFrequency / 60000);   //1 day = 1440 minutes
 let requestCounter = 0;
 
+// Discord Starting Message
+discord.info(`**Stato**`, `Stato`, `🟢🟢🟢 Il servizio di monitoraggio è ONLINE 🟢🟢🟢`)
+.then(() => console.log('Message received in Discord!'))
+.catch(err => console.log(`Discord API error: ${err.message}`));
 
 //Main function
 const intervalId = setInterval(function () {
@@ -70,7 +74,7 @@ const intervalId = setInterval(function () {
                     */
 
                     // Discord Information Message
-                    discord.info(`**ATTENZIONE**`, `Cambiamento!`, `🔥🔥🔥 Cambiamento rilevato su ${urlToCheck} 🔥🔥🔥 `)
+                    discord.info(`**ATTENZIONE**`, `Cambiamento!`, `❗️❗️❗️ Cambiamento rilevato su ${urlToCheck} ❗️❗️❗️ `)
                     .then(() => console.log('Message received in Discord!'))
                     .catch(err => console.log(`Discord API error: ${err.message}`));
 
@@ -113,7 +117,7 @@ const intervalId = setInterval(function () {
         */
 
         // Discord Information Message
-        discord.info(`**Stato**`, `Stato`, `👀👀👀 Il servizio di monitoraggio è OK 👀👀👀`)
+        discord.info(`**Stato**`, `Stato`, `✅✅✅ Il servizio di monitoraggio è ONLINE ✅✅✅`)
         .then(() => console.log('Message received in Discord!'))
         .catch(err => console.log(`Discord API error: ${err.message}`));
     }
@@ -128,6 +132,18 @@ app.get('/', function (req, res) {
 
 
 //Server start
-app.listen(PORT, function () {
+const server = app.listen(PORT, function () {
     console.log(`Example app listening on port ${PORT}!`)
 });
+
+//SIGTERM signal handling for Heroku
+process.on('SIGTERM', function () {
+    // Discord Closing Message
+    discord.info(`**Stato**`, `Stato`, `🔴🔴🔴 Il servizio di monitoraggio è OFFLINE 🔴🔴🔴`)
+    .then(() => console.log('Message received in Discord!'))
+    .catch(err => console.log(`Discord API error: ${err.message}`));
+
+    server.close(function () {
+        console.log('Server closed')
+    })
+})
