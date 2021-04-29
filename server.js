@@ -15,27 +15,15 @@ const urlToCheck = process.env.URL;
 const elementsToSearchFor = ['Giugno', 'Luglio', 'Settembre', 'GIUGNO', 'LUGLIO', 'SETTEMBRE'];
 const checkingFrequency = 5 * 60000; //first number represent the checkingFrequency in minutes
 
-//Slack Integration
-/*
-const SLACK_WEBHOOK_URL = 'https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX';
-const slack = require('slack-notify')(SLACK_WEBHOOK_URL);
-*/
 
 //Discord Integration
 const DISCORD_WEBHOOK_URL = process.env.DISCORD;
+const DISCORD_AVATAR_URL = 'https://raw.githubusercontent.com/giacar/website-change-monitor/master/public/mstile-150x150.png';
 const {Webhook} = require('discord-webhook-node');
 const discord = new Webhook(DISCORD_WEBHOOK_URL);
-discord.setUsername('Calendario Esami')
-discord.setAvatar('https://raw.githubusercontent.com/giacar/website-change-monitor/master/public/mstile-150x150.png')
+discord.setUsername('Calendario Esami');
+discord.setAvatar(DISCORD_AVATAR_URL);
 
-//SendGrid Email Integration
-/*
-const SENDGRID_APY_KEY = process.env.SENDGRID;
-const sgMail = require('@sendgrid/mail');
-sgMail.setApiKey(SENDGRID_APY_KEY);
-const emailFrom = 'aaa@aaa.com';
-const emailsToAlert = ['emailOneToSend@theAlert.com', 'emailTwoToSend@theAlert.com'];
-*/
 
 const checkingNumberBeforeWorkingOKEmail = 1440 / (checkingFrequency / 60000);   //1 day = 1440 minutes
 let requestCounter = 0;
@@ -64,34 +52,11 @@ const intervalId = setInterval(function () {
                 //if any elementsToSearchFor exist
                 if (elementsToSearchFor.some((el) => body.includes(el))) {
 
-                    // Slack Alert Notification
-                    /*
-                    slack.alert(`🔥🔥🔥  <${urlToCheck}/|Change detected in ${urlToCheck}>  🔥🔥🔥 `, function (err) {
-                        if (err) {
-                            console.log('Slack API error:', err);
-                        } else {
-                            console.log('Message received in slack!');
-                        }
-                    });
-                    */
-
                     // Discord Information Message
                     discord.info(`**ATTENZIONE**`, `Cambiamento!`, `❗️❗️❗️ Cambiamento rilevato su ${urlToCheck} ❗️❗️❗️ `)
                     .then(() => console.log('Message received in Discord!'))
                     .catch(err => console.log(`Discord API error: ${err.message}`));
 
-                    // Email Alert Notification
-                    /*
-                    const msg = {
-                        to: emailsToAlert,
-                        from: emailFrom,
-                        subject: `🔥🔥🔥 Change detected in ${urlToCheck} 🔥🔥🔥`,
-                        html: `Change detected in <a href="${urlToCheck}"> ${urlToCheck} </a>  `,
-                    };
-                    sgMail.send(msg)
-                        .then(()=>{console.log("Alert Email Sent!");})
-                        .catch((emailError)=>{console.log(emailError);});
-                    */
                 }
 
             }
@@ -101,22 +66,10 @@ const intervalId = setInterval(function () {
     requestCounter++;
 
 
-    // "Working OK" email notification logic
+    // "Working OK" notification logic
     if (requestCounter > checkingNumberBeforeWorkingOKEmail) {
 
         requestCounter = 0;
-        
-        /*
-        const msg = {
-            to: emailsToAlert,
-            from: emailFrom,
-            subject: '👀👀👀 Website Change Monitor is working OK 👀👀👀',
-            html: `Website Change Monitor is working OK - <b>${new Date().toLocaleString("en-US", {timeZone: "America/New_York"})}</b>`,
-        };
-        sgMail.send(msg)
-            .then(()=>{console.log("Working OK Email Sent!");})
-            .catch((emailError)=>{console.log(emailError);});
-        */
 
         // Discord Information Message
         discord.info(`**Stato**`, `Stato`, `✅✅✅ Il servizio di monitoraggio è ONLINE ✅✅✅`)
@@ -134,7 +87,7 @@ app.get('/', function (req, res) {
 
 
 //Server start
-const server = app.listen(PORT, function () {
+const server = app.listen(PORT || 3000, function () {
     console.log(`Example app listening on port ${PORT}!`)
 });
 
@@ -147,5 +100,9 @@ process.on('SIGTERM', function () {
 
     server.close(function () {
         console.log('Server closed')
-    })
+    });
+
+    setTimeout(function () {
+        process.exit()
+    }, 1000);
 })
