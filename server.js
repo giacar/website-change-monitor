@@ -19,7 +19,8 @@ const checkingFrequency = parseInt(process.env.INTERVAL) * 60000; //first number
 //Discord Integration
 const DISCORD_WEBHOOK_URL = process.env.DISCORD;
 const DISCORD_AVATAR_URL = 'https://raw.githubusercontent.com/giacar/website-change-monitor/master/public/mstile-150x150.png';
-const {Webhook} = require('discord-webhook-node');
+const HEROKU_URL = process.env.HEROKU_URL;
+const {Webhook, MessageBuilder} = require('discord-webhook-node');
 const discord = new Webhook(DISCORD_WEBHOOK_URL);
 discord.setUsername('Website Monitor');
 discord.setAvatar(DISCORD_AVATAR_URL);
@@ -29,7 +30,11 @@ const checkingNumberBeforeWorkingOKEmail = 1440 / (checkingFrequency / 60000);  
 let requestCounter = 0;
 
 // Discord Starting Message
-discord.info(`**Stato**`, `Stato`, `🟢🟢🟢 Il servizio di monitoraggio è ONLINE 🟢🟢🟢`)
+const startembed = new MessageBuilder()
+.setTitle('🟢🟢🟢 Stato 🟢🟢🟢')
+.setAuthor('Website Monitor', DISCORD_AVATAR_URL, HEROKU_URL)
+.setDescription('🟢🟢🟢 Il servizio di monitoraggio è ONLINE 🟢🟢🟢');
+discord.send(startembed)
 .then(() => console.log('Message received in Discord!'))
 .catch(err => console.log(`Discord API error: ${err.message}`));
 
@@ -53,7 +58,11 @@ const intervalId = setInterval(function () {
                 if (elementsToSearchFor.some((el) => body.includes(el))) {
 
                     // Discord Information Message
-                    discord.info(`**ATTENZIONE**`, `Cambiamento!`, `❗️❗️❗️ Cambiamento rilevato su ${urlToCheck} ❗️❗️❗️ `)
+                    const changeembed = new MessageBuilder()
+                    .setTitle('❗️❗️❗️ Stato ❗️❗️❗️')
+                    .setAuthor('Website Monitor', DISCORD_AVATAR_URL, HEROKU_URL)
+                    .setDescription('❗️❗️❗️ Cambiamento rilevato su ${urlToCheck} ❗️❗️❗️');
+                    discord.send(changeembed)
                     .then(() => console.log('Message received in Discord!'))
                     .catch(err => console.log(`Discord API error: ${err.message}`));
 
@@ -72,7 +81,11 @@ const intervalId = setInterval(function () {
         requestCounter = 0;
 
         // Discord Information Message
-        discord.info(`**Stato**`, `Stato`, `✅✅✅ Il servizio di monitoraggio è ONLINE ✅✅✅`)
+        const changeembed = new MessageBuilder()
+        .setTitle('✅✅✅ Stato ✅✅✅')
+        .setAuthor('Website Monitor', DISCORD_AVATAR_URL, HEROKU_URL)
+        .setDescription('✅✅✅ Il servizio di monitoraggio è ONLINE ✅✅✅');
+        discord.send(changeembed)
         .then(() => console.log('Message received in Discord!'))
         .catch(err => console.log(`Discord API error: ${err.message}`));
     }
@@ -94,7 +107,11 @@ const server = app.listen(PORT || 3000, function () {
 //SIGTERM signal handling for Heroku
 process.on('SIGTERM', function () {
     // Discord Closing Message
-    discord.info(`**Stato**`, `Stato`, `🔴🔴🔴 Il servizio di monitoraggio è OFFLINE 🔴🔴🔴`)
+    const closeembed = new MessageBuilder()
+    .setTitle('♻️♻️♻️ Stato ♻️♻️♻')
+    .setAuthor('Website Monitor', DISCORD_AVATAR_URL, HEROKU_URL)
+    .setDescription('🔴🔴🔴 Il servizio di monitoraggio è OFFLINE 🔴🔴🔴');
+    discord.send(closeembed)
     .then(() => console.log('Message received in Discord!'))
     .catch(err => console.log(`Discord API error: ${err.message}`));
 
