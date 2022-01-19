@@ -12,8 +12,8 @@ const PORT = process.env.PORT;
 
 //Main configuration variables
 const urlToCheck = process.env.URL;
-const elementsToSearchFor = ['Giugno', 'Luglio', 'Settembre', 'GIUGNO', 'LUGLIO', 'SETTEMBRE'];
-const checkingFrequency = 5 * 60000; //first number represent the checkingFrequency in minutes
+const elementsToSearchFor = (process.env.PARAM).split(";");
+const checkingFrequency = parseInt(process.env.INTERVAL) * 60000; //first number represent the checkingFrequency in minutes
 
 
 //Discord Integration
@@ -21,7 +21,7 @@ const DISCORD_WEBHOOK_URL = process.env.DISCORD;
 const DISCORD_AVATAR_URL = 'https://raw.githubusercontent.com/giacar/website-change-monitor/master/public/mstile-150x150.png';
 const {Webhook} = require('discord-webhook-node');
 const discord = new Webhook(DISCORD_WEBHOOK_URL);
-discord.setUsername('Calendario Esami');
+discord.setUsername('Website Monitor');
 discord.setAvatar(DISCORD_AVATAR_URL);
 
 
